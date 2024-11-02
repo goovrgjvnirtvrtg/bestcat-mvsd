@@ -1,0 +1,177 @@
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+
+-- Create a window
+local Window = OrionLib:MakeWindow({Name = "Murders vs Sheriffs GUI", HidePremium = false, SaveConfig = true, ConfigFolder = "MVS_Config"})
+
+-- Create an ESP tab
+local ESPTab = Window:MakeTab({
+    Name = "ESP",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+-- Create a section for ESP
+local ESPSection = ESPTab:AddSection({
+    Name = "ESP"
+})
+
+-- Function to enable/disable ESP X-ray
+local function toggleESP(state)
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer then
+            for _, part in pairs(player.Character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.Transparency = state and 0.5 or 0  -- Adjust transparency for X-ray effect
+                    part.Material = state and Enum.Material.ForceField or Enum.Material.Plastic  -- Optional: Change material for better visibility
+                end
+            end
+        end
+    end
+end
+
+-- Add a toggle button for ESP X-ray
+ESPSection:AddToggle({
+    Name = "ESP X-ray",
+    Default = false,
+    Callback = function(value)
+        toggleESP(value)
+    end
+})
+
+-- Create an Aimbot tab
+local AimbotTab = Window:MakeTab({
+    Name = "Aimbot",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+-- Create a section for Aimbot
+local AimbotSection = AimbotTab:AddSection({
+    Name = "Aimbot"
+})
+
+-- Variables for aimbot
+local aimbotEnabled = false
+local teamCheckEnabled = false
+local deadCheckEnabled = false
+local fovRadius = 100
+local playerService = game:GetService("Players")
+local localPlayer = playerService.LocalPlayer
+local mouse = localPlayer:GetMouse()
+local uis = game:GetService("UserInputService")
+
+-- Draw FOV circle
+local fovCircle = Drawing.new("Circle")
+fovCircle.Visible = true
+fovCircle.Color = Color3.fromRGB(255, 0, 0)
+fovCircle.Thickness = 1
+fovCircle.NumSides = 30
+fovCircle.Radius = fovRadius
+fovCircle.Filled = false
+fovCircle.Position = Vector2.new(mouse.X, mouse.Y)
+
+-- Update FOV circle position
+game:GetService("RunService").RenderStepped:Connect(function()
+    fovCircle.Position = Vector2.new(mouse.X, mouse.Y + 36) -- Adjust for the offset
+    fovCircle.Radius = fovRadius
+end)
+
+-- Function to find the nearest player within FOV
+local function getNearestPlayer()
+    local nearestPlayer = nil
+    local shortestDistance = math.huge
+
+    for _, player in pairs(playerService:GetPlayers()) do
+        if player ~= localPlayer and player.Character and player.Character:FindFirstChild("Head") then
+            if teamCheckEnabled and player.Team == localPlayer.Team then
+                continue
+            end
+            if deadCheckEnabled and player.Character.Humanoid.Health <= 0 then
+                continue
+            end
+            local screenPos = workspace.CurrentCamera:WorldToViewportPoint(player.Character.Head.Position)
+            local distance = (Vector2.new(screenPos.X, screenPos.Y) - Vector2.new(mouse.X, mouse.Y)).magnitude
+            if distance < fovRadius and distance < shortestDistance then
+                shortestDistance = distance
+                nearestPlayer = player
+            end
+        end
+    end
+
+    return nearestPlayer
+end
+
+-- Aimbot functionality
+local function aimAtPlayer(player)
+    if player and player.Character and player.Character:FindFirstChild("Head") then
+        local head = player.Character.Head
+        local headPos = head.Position
+        local screenPos = workspace.CurrentCamera:WorldToViewportPoint(headPos)
+        mousemoveabs(screenPos.X, screenPos.Y)
+    end
+end
+
+-- Add a toggle button for Aimbot
+AimbotSection:AddToggle({
+    Name = "Aimbot",
+    Default = false,
+    Callback = function(value)
+        aimbotEnabled = value
+        while aimbotEnabled do
+            local nearestPlayer = getNearestPlayer()
+            aimAtPlayer(nearestPlayer)
+            wait(0.1)  -- Adjust the delay as necessary
+        end
+    end
+})
+
+-- Add a toggle for TeamCheck
+AimbotSection:AddToggle({
+    Name = "TeamCheck",
+    Default = false,
+    Callback = function(value)
+        teamCheckEnabled = value
+    end
+})
+
+-- Add a toggle for DeadCheck
+AimbotSection:AddToggle({
+    Name = "DeadCheck",
+    Default = false,
+    Callback = function(value)
+        deadCheckEnabled = value
+    end
+})
+
+-- Add a slider for FOV radius
+AimbotSection:AddSlider({
+    Name = "FOV Radius",
+    Min = 50,
+    Max = 300,
+    Default = 100,
+    Color = Color3.fromRGB(255, 0, 0),
+    Increment = 1,
+    ValueName = "Radius",
+    Callback = function(value)
+        fovRadius = value
+    end
+})
+
+-- Create a Credits tab
+local CreditsTab = Window:MakeTab({
+    Name = "Credits",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+-- Create a section for Credits
+local CreditsSection = CreditsTab:AddSection({
+    Name = "Credits"
+})
+
+-- Add a label for credits
+CreditsSection:AddParagraph("Made by", "bestcat")
+CreditsSection:AddParagraph("Made better by", "AI Beta for ScriptHub")
+
+-- Initialize the GUI
+OrionLib:Init()
