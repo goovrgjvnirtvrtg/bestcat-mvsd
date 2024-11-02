@@ -157,6 +157,88 @@ AimbotSection:AddSlider({
     end
 })
 
+-- Create a Hitbox tab
+local HitboxTab = Window:MakeTab({
+    Name = "Hitbox",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+-- Create a section for Hitbox
+local HitboxSection = HitboxTab:AddSection({
+    Name = "Hitbox"
+})
+
+-- Variables for hitbox size
+local hitboxSize = Vector3.new(2, 2, 1) -- Default hitbox size
+
+-- Function to adjust hitbox size
+local function adjustHitboxSize(player, size)
+    if player.Character then
+        for _, part in pairs(player.Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Size = size
+                part.CanCollide = false
+            end
+        end
+    end
+end
+
+-- Add sliders for hitbox dimensions
+HitboxSection:AddSlider({
+    Name = "Hitbox Width",
+    Min = 1,
+    Max = 10,
+    Default = 2,
+    Color = Color3.fromRGB(255, 0, 0),
+    Increment = 0.1,
+    ValueName = "Width",
+    Callback = function(value)
+        hitboxSize = Vector3.new(value, hitboxSize.Y, hitboxSize.Z)
+    end
+})
+
+HitboxSection:AddSlider({
+    Name = "Hitbox Height",
+    Min = 1,
+    Max = 10,
+    Default = 2,
+    Color = Color3.fromRGB(255, 0, 0),
+    Increment = 0.1,
+    ValueName = "Height",
+    Callback = function(value)
+        hitboxSize = Vector3.new(hitboxSize.X, value, hitboxSize.Z)
+    end
+})
+
+HitboxSection:AddSlider({
+    Name = "Hitbox Depth",
+    Min = 1,
+    Max = 10,
+    Default = 1,
+    Color = Color3.fromRGB(255, 0, 0),
+    Increment = 0.1,
+    ValueName = "Depth",
+    Callback = function(value)
+        hitboxSize = Vector3.new(hitboxSize.X, hitboxSize.Y, value)
+    end
+})
+
+-- Function to apply hitbox adjustments
+local function applyHitboxAdjustments()
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer then
+            adjustHitboxSize(player, hitboxSize)
+        end
+    end
+end
+
+-- Add a button to apply hitbox adjustments
+HitboxSection:AddButton({
+    Name = "Apply Hitbox Adjustments",
+    Callback = applyHitboxAdjustments
+})
+
 -- Create a Credits tab
 local CreditsTab = Window:MakeTab({
     Name = "Credits",
@@ -165,13 +247,13 @@ local CreditsTab = Window:MakeTab({
 })
 
 -- Create a section for Credits
-local CreditsSection = CreditsTab:AddSection({
+CreditsSection = CreditsTab:AddSection({
     Name = "Credits"
 })
 
 -- Add a label for credits
 CreditsSection:AddParagraph("Made by", "bestcat")
-CreditsSection:AddParagraph("Made better by", "AI Beta for ScriptHub")
+CreditsSection:AddParagraph("Made better by", "ScriptHub")
 
 -- Initialize the GUI
 OrionLib:Init()
