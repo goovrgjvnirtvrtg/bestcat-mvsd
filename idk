@@ -252,8 +252,8 @@ CreditsSection = CreditsTab:AddSection({
 })
 
 -- Add a label for credits
-CreditsSection:AddParagraph("Made by", "bestcat")
-CreditsSection:AddParagraph("Made better by", "ScriptHub")
+CreditsSection:AddParagraph("Made by", "best cat/disord goober")
+CreditsSection:AddParagraph("FOR", "Cletus sroeet ScriptHub")
 
 -- Initialize the GUI
 OrionLib:Init()
